@@ -116,6 +116,9 @@
                             <li>
                                 <a href="#dragOverClass">dragOverClass</a>
                             </li>
+                            <li>
+                                <a href="#restrictByEventTarget">restrictByEventTarget</a>
+                            </li>
                         </ul>
                     </td>
                 </tr>
@@ -161,7 +164,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="70" class="link-to-prism">projects/angular-draggable-droppable/src/lib/droppable.directive.ts:70</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="77" class="link-to-prism">projects/angular-draggable-droppable/src/lib/droppable.directive.ts:77</a></div>
                             </td>
                         </tr>
 
@@ -303,6 +306,34 @@
                 </tr>
             </tbody>
         </table>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
+                        <a name="restrictByEventTarget"></a>
+                        <b>restrictByEventTarget</b>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Default value : </i><code>false</code>
+                    </td>
+                </tr>
+                        <tr>
+                            <td class="col-md-2" colspan="2">
+                                    <div class="io-line">Defined in <a href="" data-line="55" class="link-to-prism">projects/angular-draggable-droppable/src/lib/droppable.directive.ts:55</a></div>
+                            </td>
+                        </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <div class="io-description"><p>If set to true, will check the mouse event target to restrict dropping.
+This is useful if you would like to prevent dropping when there are floating
+elements (e.g. absolutely positioned) above the <code>mwlDroppable</code> element</p>
+</div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
 </section>
             <section>
     <h3 id="outputs">Outputs</h3>
@@ -322,7 +353,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-2" colspan="2">
-                                    <div class="io-line">Defined in <a href="" data-line="53" class="link-to-prism">projects/angular-draggable-droppable/src/lib/droppable.directive.ts:53</a></div>
+                                    <div class="io-line">Defined in <a href="" data-line="60" class="link-to-prism">projects/angular-draggable-droppable/src/lib/droppable.directive.ts:60</a></div>
                             </td>
                         </tr>
                 <tr>
@@ -349,7 +380,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-2" colspan="2">
-                                    <div class="io-line">Defined in <a href="" data-line="58" class="link-to-prism">projects/angular-draggable-droppable/src/lib/droppable.directive.ts:58</a></div>
+                                    <div class="io-line">Defined in <a href="" data-line="65" class="link-to-prism">projects/angular-draggable-droppable/src/lib/droppable.directive.ts:65</a></div>
                             </td>
                         </tr>
                 <tr>
@@ -376,7 +407,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-2" colspan="2">
-                                    <div class="io-line">Defined in <a href="" data-line="63" class="link-to-prism">projects/angular-draggable-droppable/src/lib/droppable.directive.ts:63</a></div>
+                                    <div class="io-line">Defined in <a href="" data-line="70" class="link-to-prism">projects/angular-draggable-droppable/src/lib/droppable.directive.ts:70</a></div>
                             </td>
                         </tr>
                 <tr>
@@ -403,7 +434,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-2" colspan="2">
-                                    <div class="io-line">Defined in <a href="" data-line="68" class="link-to-prism">projects/angular-draggable-droppable/src/lib/droppable.directive.ts:68</a></div>
+                                    <div class="io-line">Defined in <a href="" data-line="75" class="link-to-prism">projects/angular-draggable-droppable/src/lib/droppable.directive.ts:75</a></div>
                             </td>
                         </tr>
                 <tr>
@@ -443,7 +474,7 @@
                     </tr>
                         <tr>
                             <td class="col-md-4">
-                                    <div class="io-line">Defined in <a href="" data-line="70" class="link-to-prism">projects/angular-draggable-droppable/src/lib/droppable.directive.ts:70</a></div>
+                                    <div class="io-line">Defined in <a href="" data-line="77" class="link-to-prism">projects/angular-draggable-droppable/src/lib/droppable.directive.ts:77</a></div>
                             </td>
                         </tr>
 
@@ -507,6 +538,13 @@ export class DroppableDirective implements OnInit, OnDestroy {
   @Input() dragActiveClass: string;
 
   /**
+   * If set to true, will check the mouse event target to restrict dropping.
+   * This is useful if you would like to prevent dropping when there are floating
+   * elements (e.g. absolutely positioned) above the &#x60;mwlDroppable&#x60; element
+   */
+  @Input() restrictByEventTarget &#x3D; false;
+
+  /**
    * Called when a draggable element starts overlapping the element
    */
   @Output() dragEnter &#x3D; new EventEmitter&lt;DropEvent&gt;();
@@ -560,7 +598,7 @@ export class DroppableDirective implements OnInit, OnDestroy {
 
         let currentDragDropData: any;
         const overlaps$ &#x3D; drag$.pipe(
-          map(({ clientX, clientY, dropData }) &#x3D;&gt; {
+          map(({ clientX, clientY, dropData, target }) &#x3D;&gt; {
             currentDragDropData &#x3D; dropData;
             if (droppableElement.updateCache) {
               droppableElement.rect &#x3D; this.element.nativeElement.getBoundingClientRect();
@@ -574,9 +612,13 @@ export class DroppableDirective implements OnInit, OnDestroy {
               clientY,
               droppableElement.rect as ClientRect
             );
+
+            const isTargetAllowed &#x3D; this.isTargetAllowed(target);
+
             if (droppableElement.scrollContainerRect) {
               return (
                 isWithinElement &amp;&amp;
+                isTargetAllowed &amp;&amp;
                 isCoordinateWithinRectangle(
                   clientX,
                   clientY,
@@ -584,7 +626,7 @@ export class DroppableDirective implements OnInit, OnDestroy {
                 )
               );
             } else {
-              return isWithinElement;
+              return isWithinElement &amp;&amp; isTargetAllowed;
             }
           })
         );
@@ -650,6 +692,18 @@ export class DroppableDirective implements OnInit, OnDestroy {
     if (this.currentDragSubscription) {
       this.currentDragSubscription.unsubscribe();
     }
+  }
+
+  private isTargetAllowed(target: EventTarget): boolean {
+    if (!this.restrictByEventTarget) {
+      return true;
+    }
+
+    const closestDroppableElement &#x3D; (target as Element).closest(
+      &#x27;[mwlDroppable]&#x27;
+    );
+
+    return closestDroppableElement &#x3D;&#x3D;&#x3D; this.element.nativeElement;
   }
 }
 </code></pre>

@@ -176,6 +176,13 @@ export class DroppableDirective implements OnInit, OnDestroy {
   @Input() dragActiveClass: string;
 
   /**
+   * If set to true, will check the mouse event target to restrict dropping.
+   * This is useful if you would like to prevent dropping when there are floating
+   * elements (e.g. absolutely positioned) above the &#x60;mwlDroppable&#x60; element
+   */
+  @Input() restrictByEventTarget &#x3D; false;
+
+  /**
    * Called when a draggable element starts overlapping the element
    */
   @Output() dragEnter &#x3D; new EventEmitter&lt;DropEvent&gt;();
@@ -229,7 +236,7 @@ export class DroppableDirective implements OnInit, OnDestroy {
 
         let currentDragDropData: any;
         const overlaps$ &#x3D; drag$.pipe(
-          map(({ clientX, clientY, dropData }) &#x3D;&gt; {
+          map(({ clientX, clientY, dropData, target }) &#x3D;&gt; {
             currentDragDropData &#x3D; dropData;
             if (droppableElement.updateCache) {
               droppableElement.rect &#x3D; this.element.nativeElement.getBoundingClientRect();
@@ -243,9 +250,13 @@ export class DroppableDirective implements OnInit, OnDestroy {
               clientY,
               droppableElement.rect as ClientRect
             );
+
+            const isTargetAllowed &#x3D; this.isTargetAllowed(target);
+
             if (droppableElement.scrollContainerRect) {
               return (
                 isWithinElement &amp;&amp;
+                isTargetAllowed &amp;&amp;
                 isCoordinateWithinRectangle(
                   clientX,
                   clientY,
@@ -253,7 +264,7 @@ export class DroppableDirective implements OnInit, OnDestroy {
                 )
               );
             } else {
-              return isWithinElement;
+              return isWithinElement &amp;&amp; isTargetAllowed;
             }
           })
         );
@@ -319,6 +330,18 @@ export class DroppableDirective implements OnInit, OnDestroy {
     if (this.currentDragSubscription) {
       this.currentDragSubscription.unsubscribe();
     }
+  }
+
+  private isTargetAllowed(target: EventTarget): boolean {
+    if (!this.restrictByEventTarget) {
+      return true;
+    }
+
+    const closestDroppableElement &#x3D; (target as Element).closest(
+      &#x27;[mwlDroppable]&#x27;
+    );
+
+    return closestDroppableElement &#x3D;&#x3D;&#x3D; this.element.nativeElement;
   }
 }
 </code></pre>
